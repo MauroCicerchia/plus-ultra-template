@@ -36,8 +36,8 @@ Zod · Neon Postgres · Drizzle · Vitest · Biome · GitHub Actions · Vercel
 | `pnpm test` | Runs Vitest in every workspace. |
 | `pnpm lint` | Runs Biome checks. |
 | `pnpm format` | Applies Biome-safe formatting and lint fixes. |
-| `pnpm db:generate` | Generates a Drizzle migration from the schema. |
-| `pnpm db:migrate` | Applies Drizzle migrations. |
+| `pnpm db:generate` | Generates a Drizzle migration from the schema. Works offline. |
+| `pnpm db:migrate` | Applies Drizzle migrations. Needs `DATABASE_URL_UNPOOLED`. |
 
 The web app runs at `http://localhost:5173` and proxies `/api` to the API at `http://localhost:3000`.
 `GET /health` is the only route: the API serves it at `/health`, and the browser reaches it at
@@ -60,14 +60,18 @@ boundary working.
 ## Database
 
 Drizzle is configured for PostgreSQL against Neon, with an intentionally empty schema. Nothing connects
-at import time, so install, tests and builds never need a database. Only `pnpm db:generate` and
-`pnpm db:migrate` require a connection string.
+at import time, so install, tests, builds and `pnpm db:generate` never need a database. Only
+`pnpm db:migrate` requires a connection string.
 
 Two URLs, because they are not interchangeable (see `.env.example`):
 
 - `DATABASE_URL` — the **pooled** Neon connection, used by API runtime queries.
 - `DATABASE_URL_UNPOOLED` — the **direct** Neon connection, used by Drizzle migrations, which cannot
   run through a pooler.
+
+The two never substitute for each other: migrations require `DATABASE_URL_UNPOOLED` and fail rather
+than fall back to the pooled URL. Both are validated as PostgreSQL URLs, and a `-pooler` host is
+rejected for migrations.
 
 ## Deployment
 

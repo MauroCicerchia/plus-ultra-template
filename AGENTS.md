@@ -7,9 +7,15 @@ This file defines stable working agreements for coding agents. Human-oriented se
 
 This repository is a **template**. It has no product behaviour on purpose.
 
-A product built from it owns its own context — its brief, its design system, its specs. Read those
-documents (typically `DESIGN.md` and whatever spec directory the product adopts) before changing
-behaviour. Do not restate them here, and do not treat this file as a substitute for them.
+A product built from it owns its own context. Read whichever of these exist before changing
+behaviour, and prefer them over anything restated here:
+
+- `docs/product.md` — what the product is, who it serves, and its boundaries.
+- `DESIGN.md` — the durable design brief the semantic tokens in `apps/web/src/index.css` implement.
+- `specs/NNN-*.md` — the numbered specification governing the change in hand, when the product uses them.
+
+None of these ship with the template. Do not create them speculatively, and do not copy their contents
+into this file.
 
 ## Language
 
