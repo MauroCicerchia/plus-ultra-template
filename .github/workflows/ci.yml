@@ -24,7 +24,9 @@ jobs:
       # Formatting and lint. `biome ci` never writes and annotates the diff.
       - run: pnpm biome ci .
 
-      - run: pnpm -r typecheck
+      # Root script, not `pnpm -r typecheck`: the recursive form skips the root
+      # tsconfig, which owns the `api/[...path].ts` Vercel entrypoint.
+      - run: pnpm typecheck
 
       - run: pnpm -r test
 
