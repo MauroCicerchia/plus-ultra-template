@@ -1,0 +1,24 @@
+{
+  "name": "plus-ultra-template",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.13.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @app/api --filter @app/web dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "tsc --noEmit && pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "db:generate": "pnpm --filter @app/api db:generate",
+    "db:migrate": "pnpm --filter @app/api db:migrate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "typescript": "7.0.2"
+  }
+}
