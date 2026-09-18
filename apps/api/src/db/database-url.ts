@@ -3,29 +3,55 @@ type DatabaseEnvironment = Readonly<{
   DATABASE_URL_UNPOOLED?: string | undefined;
 }>;
 
+const postgresProtocols = new Set(["postgres:", "postgresql:"]);
+
+const parsePostgresUrl = (value: string, variableName: string): URL => {
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(value);
+  } catch {
+    throw new Error(`${variableName} must be a valid PostgreSQL connection URL`);
+  }
+
+  if (!postgresProtocols.has(parsedUrl.protocol)) {
+    throw new Error(`${variableName} must be a valid PostgreSQL connection URL`);
+  }
+
+  return parsedUrl;
+};
+
+const isPooledHost = (parsedUrl: URL): boolean =>
+  parsedUrl.hostname.split(".")[0]?.endsWith("-pooler") ?? false;
+
 /**
- * Drizzle migrations must use the direct Neon connection: a pooler cannot run
- * them. Runtime queries use the pooled `DATABASE_URL` instead.
+ * Migrations run over the direct connection: Neon's pooler cannot execute them.
+ * There is deliberately no fallback to `DATABASE_URL`, because that variable
+ * holds the pooled connection.
  */
 export const resolveMigrationDatabaseUrl = (environment: DatabaseEnvironment): string => {
-  const databaseUrl = environment.DATABASE_URL_UNPOOLED ?? environment.DATABASE_URL;
+  const databaseUrl = environment.DATABASE_URL_UNPOOLED?.trim();
 
   if (!databaseUrl) {
-    throw new Error(
-      "DATABASE_URL_UNPOOLED or DATABASE_URL is required only when running Drizzle commands",
-    );
+    throw new Error("DATABASE_URL_UNPOOLED is required when running Drizzle migrations");
+  }
+
+  if (isPooledHost(parsePostgresUrl(databaseUrl, "DATABASE_URL_UNPOOLED"))) {
+    throw new Error("DATABASE_URL_UNPOOLED must use a direct PostgreSQL connection");
   }
 
   return databaseUrl;
 };
 
-/** Pooled connection used by API runtime queries. */
+/** Runtime queries use the pooled connection. */
 export const resolveRuntimeDatabaseUrl = (environment: DatabaseEnvironment): string => {
-  const databaseUrl = environment.DATABASE_URL;
+  const databaseUrl = environment.DATABASE_URL?.trim();
 
   if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required only when the API queries the database");
+    throw new Error("DATABASE_URL is required when the API queries the database");
   }
+
+  parsePostgresUrl(databaseUrl, "DATABASE_URL");
 
   return databaseUrl;
 };

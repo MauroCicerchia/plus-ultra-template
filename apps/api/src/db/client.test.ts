@@ -4,7 +4,7 @@ import { createDatabase } from "./client.js";
 describe("createDatabase", () => {
   it("does not connect until it is called", () => {
     expect(() => createDatabase({})).toThrow(
-      "DATABASE_URL is required only when the API queries the database",
+      "DATABASE_URL is required when the API queries the database",
     );
   });
 
